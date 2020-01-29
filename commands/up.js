@@ -27,13 +27,9 @@ exports.builder = yargs => {
 
 exports.handler = async argv => {
     const { force, syncs } = argv;
-
     (async () => {
-    
         await up(force,syncs);
-
     })();
-
 };
 
 async function up(force,syncs)
@@ -104,19 +100,19 @@ async function customize(name,syncs)
     console.log(chalk.green(`Install a second nic with bridged networking enabled`)); 
     await VBoxManage.execute("modifyvm", `${name} --nic2 bridged --bridgeadapter2 "${await defaultNetworkInterface()}"`);
     await VBoxManage.execute("modifyvm", `${name} --nictype2 virtio`);
-    console.log(chalk.green(`adding shared folder`));
-    console.log("hello" + syncs.length);
-    if( syncs.length > 0 )
-    {
-         let count = 0;
-         for( var sync of syncs )
-         {
-             let host = sync.split(';')[0];
-             let guest = sync.split(';')[1];
-             await VBoxManage.execute("sharedfolder", `add ${name} --name "vbox-share-${count}" --hostpath "${host}"`);
-             count++;
-         }
-    }
+    if(syncs) {
+    	console.log(chalk.green(`adding shared folder`));
+    	if( syncs.length > 0 )
+    	{
+        	let count = 0;
+         	for( var sync of syncs )
+         	{
+             		let host = sync.split(';')[0];
+             		let guest = sync.split(';')[1];
+             		await VBoxManage.execute("sharedfolder", `add ${name} --name "vbox-share-${count}" --hostpath "${host}"`);
+             		count++;
+         	}
+    	}}
 }
 
 async function postconfiguration(name,syncs)
@@ -133,7 +129,8 @@ async function postconfiguration(name,syncs)
     await ssh(`"cd App && npm install"`);
     console.log(chalk.green(`dhclient to assign ip address for bridged network`));
     await ssh("sudo dhclient enp0s8");
-    await setupSyncFoldersOnGuest(name,syncs);
+    if (syncs){
+    	await setupSyncFoldersOnGuest(name,syncs);}
 }
 
 async function setupSyncFoldersOnGuest(name,syncs)
@@ -156,6 +153,7 @@ async function setupSyncFoldersOnGuest(name,syncs)
                let guest = sync.split(';')[1];
 
                try {
+		   console.log(chalk.green(`Creating a mount for vbox-share-${count}`));
                    await ssh(`"sudo mkdir -p ${guest}"`);
 		   await ssh(`"sudo mount -t vboxsf vbox-share-${count} ${guest}"`);
                } catch (error) {
