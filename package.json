@@ -1,0 +1,22 @@
+{
+  "name": "v",
+  "version": "1.0.0",
+  "description": "Simple virtualization script.",
+  "main": "index.js",
+  "directories": {
+    "lib": "lib"
+  },
+  "scripts": {
+    "test": "mocha test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.ncsu.edu/uschatto/HW1-DevOps.git"
+  },
+  "keywords": [
+    "[\"virtual\"",
+    "\"box\"]"
+  ],
+  "author": "Udita Chattopadhyay",
+  "license": "ISC"
+}
